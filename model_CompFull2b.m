@@ -178,9 +178,9 @@ GnI(i,:) = eval(solns{10});
 end
 
 
-
+%%
 % save modelFull2b_data2; % 11/03/09
-
+save model_data-10-06-10; % 10/06/10 
 
 M1E = nonzeros(M1E);
 M2E = nonzeros(M2E);
@@ -189,25 +189,28 @@ M2I = nonzeros(M2I);
 
 
 
-sE = M2E - M1E.^2;
-sI = M2I - M1I.^2;
-nE = sE./M1E.^2;
-nI = sI./M1I.^2;
-nE3 = sE./M1E.^3;
-nI3 = sI./M1I.^3;
+s2E = M2E - M1E.^2;
+s2I = M2I - M1I.^2;
+nE = s2E./M1E;
+nI = s2I./M1I;
+nE3 = s2E./M1E.^3;
+nI3 = s2I./M1I.^3;
+fano_E = s2E./M1E.^2;
+fano_I = s2I./M1I.^2;
 
 dmv = M1I - M1E;
-dsv = sI - sE;
+dsv = s2I - s2E;
 dnv = nI - nE;
 %dn2 = nI2 - nE2;
 
 
 
 rmv = M1I./M1E;
-rsv = sI./sE;
+rsv = s2I./s2E;
 %rnv = nI./nE;
-rtv = (sI.^2./M1I) ./ (sE.^2./M1E); 
+rtv = (s2I./M1I) ./ (s2E./M1E);  % fixed 10/06/10  was sI^2 but s is var not std
 
+r_fano = (s2I./M1I.^2) ./ (s2E./M1E.^2); 
 
 % rtv = sort(rtv);
 
@@ -218,15 +221,18 @@ Data = [GmE;GsE;GnE;GmI;GsI;GnI;vars];
 
 fn = '/Users/alistair/Documents/Berkeley/Levine Lab/Data2b.txt';
 
-dlmwrite(fn,Data); 
+% dlmwrite(fn,Data); 
  %  modelFull2b_data;   11/10/09
- save modelFull2b_data2;  % 11/23/09
+ % save modelFull2b_data2;  % 11/23/09
 
+save model_data-10-06-10; % 10/06/10 
 
 
 
 %% Figure 3 of Main Text
-load modelFull2b_data2; 
+% load modelFull2b_data2; 
+load model_data-10-06-10; % 10/06/10 
+
 offset = .025;
 bins = 70;
 xmax =1 + offset;
@@ -234,6 +240,7 @@ m = log10(rmv); s = log10(rsv); n = log10(rtv);
 mb = linspace(-.2,xmax-.025,bins); % max(m)/xmax*bins;
 sb =linspace(-.2,xmax-.025,bins); % max(s)/xmax*bins;
 nb =linspace(-.2,xmax-.025,bins); % max(n)/xmax*bins;
+fano = log10(r_fano); nf = linspace(-1,xmax-.025,bins); 
 
 C = [1,.4,.4];
 
@@ -285,6 +292,24 @@ subplot(2,2,4);
 set(gca,'FontSize',F); set(gcf,'color','w');
 legend('IR Model','ER Model')
 title('PDF for \tau'); 
+
+
+figure(4); clf; 
+
+ hist(fano,nf); xlim([-1,xmax]);
+    nh = hist(n,nf); 
+  hold on; plot([0,0],[0,4/3*max(nh)],'m--','LineWidth',2);
+  
+    h = findobj(gca,'Type','patch');
+  set(h,'EdgeColor','none','FaceColor','b');
+  ylim([0,max(nh)]); ylabel('frequency'); 
+xlabel('log_{10}(F_{IR}) -log_{10}(F_{ER})');  set(gca,'YTickLabel',' ');
+title('Fano Factor, F','FontSize',F); 
+set(gcf,'color','w'); set(gca,'FontSize',F);
+
+
+
+
 
 
 %%

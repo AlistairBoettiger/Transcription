@@ -1,0 +1,199 @@
+
+%                               model_CompFull_pdist.m
+%
+% Alistair Boettiger                                   Date Begun: 04/06/09
+% Levine Lab                                     Functional Since: /09
+% Functional computational code                     Last Modified: 10/09/09
+
+% Notes:
+% compute moment generating function of first passage times for arbitrary
+% pinch point decomposed (series) Markov Chains using Matlab's symbolic
+% Algebra routines
+% Compute laplace transform of complete probability distribution
+
+
+clear all;
+% 
+% Specific Model Constants
+kab = sym('kab','real');
+kba = sym('kba','real');
+k01 = sym('k01','real'); 
+k10 = sym('k10','real'); 
+k12 = sym('k12','real'); 
+k21 = sym('k21','real'); 
+k23 = sym('k23','real'); 
+k24 = sym('k24','real'); 
+k32 = sym('k32','real'); 
+k35 = sym('k35','real'); 
+k42 = sym('k42','real'); 
+k45 = sym('k45','real'); 
+k56 = sym('k56','real'); 
+k65 = sym('k65','real'); 
+k67 = sym('k67','real'); 
+k78 = sym('k78','real'); 
+kF = sym('kF','real');
+
+% % Specific Model Constants
+% kab = rand;
+% kba = rand;
+% k01 = rand; 
+% k10 = rand;
+% k12 = rand; 
+% k21 = rand;
+% k23 = rand;
+% k24 = rand;
+% k32 = rand;
+% k35 = rand;
+% k42 = rand;
+% k45 = rand;
+% k56 = rand;
+% k65 = rand;
+% k67 = rand;
+% k78 = rand;
+% k89 = rand;
+
+
+% % Specific Model Constants
+% kab = 1;
+% kba = 1;
+% k01 = 1; 
+% k10 = 1;
+% k12 = 1; 
+% k21 = 1;
+% k23 = 1;
+% k24 = 1;
+% k32 = 1;
+% k35 = 1;
+% k42 = 1;
+% k45 = 1;
+% k56 = 1;
+% k65 = 1;
+% k67 = 1;
+% k78 = 1;
+% k89 = 1;
+
+Gen =  [[-kab,kab];  % enhancer chain
+       [kba,-kba]];
+
+
+% Submatrices for initiation regulated system
+GI{1} = zeros(3); 
+
+        
+GI{2}=[[-kab,kab,0,0];
+    [kba,-k01-kba, k01, 0];
+    [0,k10, -k10-k12, k12];
+    [0,0, k21, -k21]];
+% 
+GI{3}=[[-k23-k24, k23, k24, 0];
+    [k32, -k32-k35, 0, k35];
+    [k42, 0, -k42-k45, k45];
+    [0, k35, k45, -k35-k45]];
+
+GI{3} =[[-k56, k56, 0, 0];   % 4
+    [k65, -k65-k67, k67, 0];
+    [0, 0, -k78, k78];
+    [0, 0, 0, 0]];
+
+[vI] = SeriesDecomp_pdist(GI);  
+
+% Submatrices for elongation regulated system 
+GE{1} = zeros(3); 
+
+GE{2}=[[-k01, k01, 0];
+    [k10, -k10-k12, k12];
+    [0, k21, -k21]];
+
+GE{3}=[[-k23-k24, k23, k24, 0];
+    [k32, -k32-k35, 0, k35];
+    [k42, 0, -k42-k45, k45];
+    [0, k35, k45, -k35-k45]];
+
+GE{4}=[[-k56, k56, 0, 0];
+    [k65, -k65-k67, k67, 0];
+    [0, 0, -k78, k78];
+    [0,0,0, 0]]; % kab kba integrated below
+
+% GE{4}=[[-k56, k56, 0, 0,0];
+%     [k65, -k65-k67, k67, 0,0];
+%     [0, 0, -k78, k78,0];
+%     [0, 0, 0,-kab,kab];
+%     [0,0,0,0,0]];
+
+
+ [vE] = SeriesDecomp_pdist(GE);  
+%    
+
+pars = [ kab,  kba,  k01,   k10,   k12,  k21,  k23,   k24,   k32,   k35,  k42,  k45,   k56,   k65    ,k67,    k78];
+vals = [1E-2, 1E-2, .0216, .145, .0216, .145, .0216, .0216, .145, .0216 .145, .0216, .00159, .01,  .00159,  .00159];
+
+fI = subs(vI,pars,vals); 
+fE = subs(vE,pars,vals); 
+
+
+
+        lam = logspace(-2,8,1000);
+%       % lam = linspace(1E-5,1E5,1000);
+%   FI = invlap('invlap_LI', lam'); 
+%     FE = invlap('invlap_LE', lam'); 
+
+
+  
+   FI = invlap2(fI(1), lam'); 
+FE = invlap2(fE(1), lam'); 
+  
+  figure(1); clf; plot(lam,FI,'b.'); hold on; 
+  plot(lam,FE,'r.');
+  
+  figure(2); subplot(2,1,1); 
+   plot(lam,FE,'r.');
+  xlim([0,50000]); ylim([0,2E-4]);
+  
+  subplot(2,1,2); 
+   plot(lam,FI,'b.');
+  xlim([0,500000]); ylim([0,2E-5]);
+  
+
+  
+  
+  
+  N = 100; 
+L = zeros(1,N); 
+
+for k=1:N
+    temp = subs(f,lambda,lam(k));
+    L(k) = temp(2);
+end
+
+
+t = sym('t');
+lambda = sym('lambda','real');
+pdfE = ilaplace(fE(1),lambda,t); % leaves as 'root of...'  May need to make vector of Laplace solutions and numerically invert.  
+subs(pdfE,t,5000)
+
+
+figure(1); clf; 
+
+
+%
+% pol on = .0216, pol off  = .145/s, pro escape = .00159, kabor = 0.017
+% 
+
+% % kab = 1;
+% kba = 1;
+% k01 = 1; 
+% k10 = 1;
+% k12 = 1; 
+% k21 = 1;
+% k23 = 1;
+% k24 = 1;
+% k32 = 1;
+% k35 = 1;
+% k42 = 1;
+% k45 = 1;
+% k56 = 1;
+% k65 = 1;
+% k67 = 1;
+% k78 = 1;
+% k89 = 1;
+

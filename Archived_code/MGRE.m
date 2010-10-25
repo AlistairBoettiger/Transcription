@@ -1,0 +1,7 @@
+
+% Moment generating function for Elongation Regulation model 
+function QE = MGRE(lambda,kab,kba,k12,k21,k23)
+QE =  (3.*lambda.^2+3.*kba.*lambda+2.*k21.*lambda+2.*k23.*lambda+2.*k12.*lambda+3.*lambda.*kab+kba.*k12+2.*kba.*kab+k21.*kba+k21.*kab+k23.*kba+kab.^2+k23.*k12+k23.*kab+k12.*kab+kba.^2).*k23.*k12.*kab./((2.*k23.*k12.*kba.*kab+4.*k12.*kab.*k23.*lambda+2.*k21.*lambda.*kba.*kab+2.*k21.*lambda.*k23.*k12+2.*k21.*kab.*k12.*lambda+2.*k21.*kab.*k23.*lambda+k21.*kab.*k23.*k12+4.*lambda.*kba.*k12.*k23+2.*k12.*lambda.*kba.*kab+2.*k23.*lambda.*kba.*kab+2.*k21.*lambda.^3+k21.^2.*lambda.^2+k23.^2.*lambda.^2+k23.^2.*k12.^2+2.*lambda.^3.*kab+kab.^2.*lambda.^2+2.*k12.*lambda.^3+k12.^2.*lambda.^2+2.*k23.*lambda.^3+kba.*k12.^2.*k23+kba.^2.*k12.*k23+kba.*k12.*k23.^2+lambda.^2.*kba.^2+k21.^2.*kab.*lambda+k23.*k21.*k12.*kba+k21.*kab.^2.*lambda+3.*k21.*kab.*lambda.^2+3.*lambda.^2.*kba.*k12+3.*lambda.^2.*k23.*kba+3.*lambda.^2.*k21.*kba+lambda.*k21.*kba.^2+lambda.*k23.*kba.^2+lambda.*k21.^2.*kba+lambda.*k23.^2.*kba+lambda.*kba.*k12.^2+2.*k21.*lambda.^2.*k23+2.*k21.*lambda.^2.*k12+3.*k12.*kab.*lambda.^2+k12.^2.*kab.*lambda+k12.*kab.^2.*k23+k12.^2.*kab.*k23+k12.*kab.^2.*lambda+3.*lambda.^2.*kab.*k23+kab.^2.*k23.*lambda+k23.^2.*k12.*kab+4.*k23.*k12.*lambda.^2+2.*k23.*k12.^2.*lambda+2.*k23.^2.*k12.*lambda+2.*lambda.*k21.*k23.*kba+2.*lambda.*k12.*k21.*kba+lambda.*kba.^2.*k12+2.*kba.*lambda.^3+k23.^2.*kab.*lambda+2.*lambda.^2.*kba.*kab+lambda.^4).*(kab+lambda));
+
+
+

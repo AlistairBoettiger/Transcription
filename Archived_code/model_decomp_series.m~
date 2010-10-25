@@ -1,0 +1,265 @@
+
+%                               model_decomp_series.m
+%
+% Alistair Boettiger                                   Date Begun: 04/06/09
+% Levine Lab                                     Functional Since: --
+% Nonfunctional computational code                  Last Modified: 04/08/09
+
+% Notes:
+% compute moment generating function of first passage times for arbitrary
+% pinch point decomposed (series) Markov Chains using Matlab's symbolic
+% Algebra routines
+
+
+
+clear all;
+
+%--------------------------------------------------% 
+%    This part is model-specific inputs            %
+% -------------------------------------------------%
+% Topology parameters
+
+n = 3; % number of submatrices
+
+% Specific Model Constants
+k01 = sym('k01','real'); 
+k10 = sym('k10','real'); 
+k12 = sym('k12','real'); 
+k21 = sym('k21','real'); 
+k23 = sym('k23','real'); 
+k24 = sym('k24','real'); 
+k32 = sym('k32','real'); 
+k35 = sym('k35','real'); 
+k42 = sym('k42','real'); 
+k45 = sym('k45','real'); 
+k56 = sym('k56','real'); 
+k65 = sym('k65','real'); 
+k67 = sym('k67','real'); 
+k78 = sym('k78','real'); 
+k89 = sym('k89','real');
+
+% Submatrices for initiation regulated system
+G{1} = zeros(3); 
+
+G{2} =[[-kab,kab,0,0];
+    [kba,-k01-kba, k01, 0];
+    [0,k10, -k10-k12, k12];
+    [0,0, k21, -k21]];
+
+G{3} =[[-k23-k24, k23, k24, 0];
+    [k32, -k32-k35, 0, k35];
+    [k42, 0, -k42-k45, k45];
+    [0, k35, k45, -k35-k45]];
+
+G{4} =[[-k56, k56, 0, 0];
+    [k65, -k65-k67, k67, 0];
+    [0, 0, -k78, k78];
+    [0, 0, 0, 0]];
+
+% Submatrices for elongation regulated system 
+G{1} = zeros(3); 
+
+G{2} =[[-k01, k01, 0];
+    [k10, -k10-k12, k12];
+    [0, k21, -k21]];
+
+G{3} =[[-k23-k24, k23, k24, 0];
+    [k32, -k32-k35, 0, k35];
+    [k42, 0, -k42-k45, k45];
+    [0, k35, k45, -k35-k45]];
+
+G{4} =[[-k56, k56, 0, 0,0];
+    [k65, -k65-k67, k67, 0,0];
+    [0, 0, -k78, k78,0];
+    [0, 0, 0,-kab,kab]
+    [0,0,0,0,0]];
+
+% G{5} = zeros(3);
+% -------------- end model specific stuff -------------------- %
+
+
+
+
+%-------------------------------------------------------------------------%
+%    This part is Model Independent.  Should become a Function            %
+%-------------------------------------------------------------------------%  
+% ------------- Compute LaPlace Transform of Transition Time ------------ %
+  
+
+% initialize variables
+ x=cell(n+1,1); a = sym(zeros(n,1)); b = a; c= a; d=a; Ig=x;
+ 
+% compute eigenvectors of the G_{-sf}^k sub-matrices indexed by k
+% x_i = sum_{i~=s,f} x(s)_s (G_{-sf})^{-1}_{ij} G_{jf},  eq (41)
+for k = 2:n+1 % k=1
+    Ig{k} = inv(G{k}(2:end-1,2:end-1)); % invert G_{-sf}
+    x{k} = [-(Ig{k}(:,:)*G{k}(2:end-1,end))',1]; % do sum over i as a matrix product. 
+    % note that x^k_f = 1 by definition.  We've shortcut to that here
+    %   This gives the vector x^k = {x_i} 
+end
+x{1} = 0; 
+%
+% Compute transition probabilities to:   (eval equations (44)-(47))
+%     (a) move forward and hit p_{k+1}  (w/o returning to p_k)
+%     (b) drop back and hit p_{k-1}  (w/o returning to p_k)
+%     (c) move forward but return to p_k (before hitting p_k+1) (excursion into X^{k+1})   
+%     (d) drop back into X^{k} but return to p_k (before hitting p_k-1) (excursion into X^k}).                   
+%
+% note: p_k are the pinch points such that p_0 = s_{k=1} and p_n+1 = f_{k=n}
+% We define P as the transition between pinch points so we want to stop the
+% chain at each pinch point and ask which of the possabilities happens
+% next, (a)-(d).
+
+% sum only over i~=s,f, since x
+for k=1:n  % k=0:n-1
+    a(k) = -sum( G{k+1}(1,2:end)./( G{k+1}(1,1)+G{k}(end,end)).*x{k+1} );     % (39)
+    b(k) = -sum( G{k}(end,1:end-1)./( G{k+1}(1,1)+G{k}(end,end)).*(1-x{k}) ); % (40)
+    c(k) = -sum( G{k+1}(1,2:end)./( G{k+1}(1,1)+G{k}(end,end)).*(1-x{k+1}) ); % (41)
+    d(k) = -sum( G{k}(end,1:end-1)./( G{k+1}(1,1)+G{k}(end,end)).*x{k} );     % (42)
+%     
+%     a(k) = -sum( G{k+1}(2:end,1)./( G{k+1}(1,1)+G{k}(end,end)).*x{k+1}' );
+%     b(k) = -sum( G{k}(1:end-1,end)./( G{k+1}(1,1)+G{k}(end,end)).*(1-x{k}') );
+%     c(k) = -sum( G{k+1}(2:end,1)./( G{k+1}(1,1)+G{k}(end,end)).*(1-x{k+1})' );
+%     d(k) = -sum( G{k}(1:end-1,end)./( G{k+1}(1,1)+G{k}(end,end)).*x{k}' );
+end
+% a(n) = 0 ; c(n) = 0; % can't advance a chain from the last chain. 
+% b(n) = 0; d(n)=0;
+
+% compute matrix P from a and b.
+% substitute equations (39) and (40) into (26)
+P = sym(zeros(n+1,n+1));  
+P = P + diag(a,1); 
+P = P + diag(b,-1);
+P = P + diag(1-[a;0]-[0;b(1:end)]);
+P(end,end-1:end) = [0,1];     % (26) 
+
+% substitute (26) into Thrm 3.1 
+% we are computing:  
+% v(s)_i = Sum_{j=1:n-1}( ((eye(n-1) - P(s)_{-n})_{ij})^{-1} P(s)_{jn})    
+H =  eye(n) - P(1:end-1,1:end-1); % split up the inversion step 
+ v = H'\P(1:end-1,end);  % this is better than invert 
+% crunch each column of ()_{ij} against elements of P_{jn} to get row vector v(i) 
+
+%_________________________________________________________________________%
+
+
+% Playing around / sub in some model specific numbers 
+
+ %subs(P,{k01,k10,k12,k21,k23,k24,k32,k35,k42,k45,k56,k65,k67,678},{1,1,1,1,2,1,4,1,1,1,3,1,1,1})
+ %Hs = subs(H,{k01,k10,k12,k21,k23,k24,k32,k35,k42,k45,k56,k65,k67,678},{1,1,1,1,2,1,4,1,1,1,3,1,1,1})
+ %v = inv( eye(n) - P(1:end-1,1:end-1) )' * P(1:end-1,end); 
+% crunch each column of ()_{ij} against elements of P_{jn} to get row vector v(i) 
+%
+%
+
+
+% ================================================================ %
+
+%  Approach #2 chain moments from component moments
+%  
+% Feynman-Kac formula: 
+% (lambda (lambda I - G)^{-1})_{sf}
+
+% E[exp(-lambda tau_{01})]= E[exp(-lambda tau_{->1})] + E[exp(-lambda S^0)]   
+% E[exp(-lambda tau_{->1})] = (lambda (lambda I - G^1)^{-1})_{sf}
+% E[exp(-lambda S^0)] = -G^1_{ss}/(lambda - G^1_{ss})  
+
+
+% E[exp(-lambda tau_{kk})]= 1/(c_k+d_k)*(c_k*E[exp(-lambda tau_cw^{k+1})]...
+%    +d_k*E[exp(-lambda tau_ccw^{k})]   
+% E[exp(-lambda tau_cw^{k+1})] = 
+%
+
+% initialize new variables and data arrays
+syms lambda;
+phi = sym(zeros(1,n)); phiL=phi; phiB=phi; phiF=phi;
+expTf=phi; expTb = phi; expS = phi; expT_cw = phi; expT_ccw =phi;  
+M = sym(zeros(n,n)); S = M;
+
+
+for k=1:n-1
+       %  recall k+1 is your chain, k+2 is the chain in front  
+           Gs2 =G{k+2}; f2 = length(Gs2); 
+           Gs2(1,:) = sym(zeros(1,f2));  % Gs
+           Gs2(end,:) = sym(zeros(1,f2)); 
+           Gi2 = inv(lambda*eye(f2)-Gs2);
+    % Additional time to leave the state in the first place    
+        expS(k) = -G{k+1}(1,1)/(lambda - G{k+1}(1,1)); 
+                                          
+   %  compute component Laplace transforms for forward jumps
+       % if k<n % computations only valid for upper diagnol k<n                   
+        expTf(k) = -lambda/G{k+2}(1,1)*G{k+2}(1,2:f2)*(Gi2(2:f2,f2)./x{k+2}');   %  (43)
+        phiF(k) = expTf(k) + expS(k); % Laplace transform of tau_{k,k+1}
+        phip = diff(phiF(k),lambda);
+        % now we can differentiate laplace transforms to get moments
+              
+         M(k,k+1) = -P(k,k+1)*subs(phip,lambda,0); % mean of tau_{k,k+1}
+         S(k,k+1) = P(k,k+1)*subs(diff(phip,lambda),lambda,0); % moment2 of tau_{k,k+1}
+      %  end  
+end
+
+for k=1:n
+        % Global terms, inverting G**
+        Gs = G{k+1}; % define G**
+        f = length(Gs); 
+        Gs(1,:) = sym(zeros(1,f));  Gs(end,:) = sym(zeros(1,f)); 
+        Gi = inv(lambda*eye(f)-Gs);
+       % GI{k} = subs(Gi,{k01,k10,k12,k21,k23,k24,k32,k35,k42,k45,k56,k65,k67,k78},{1,1,1,1,1,1,1,1,1,1,1,1,1,1});
+       % X{k} = subs(x{k+1},{k01,k10,k12,k21,k23,k24,k32,k35,k42,k45,k56,k65,k67,k78},{1,1,1,1,1,1,1,1,1,1,1,1,1,1})
+        
+   % compute component Laplace transforms for self loops
+       %  pt1{k} = -lambda/G{k+1}(1,1)*G{k+1}(1,2:f) % troubleshooting exploratory code    
+       %   pt2{k} = Gi(2:f,1)
+       expT_cw(k) = -lambda/G{k+1}(1,1)*G{k+1}(1,2:f)*(Gi(2:f,1)./(1-x{k+1}')); % eq (45)
+       % chain of x is the chain of G
+       % using matrix product to compute sum as usual 
+       try       % 0/0 = 0 
+       expT_ccw(k) = -lambda/G{k+1}(f,f)*G{k+1}(f,1:f-1)*(Gi(1:f-1,f)./[0,x{k+1}(1:end-1)]'); % eq (46) % corrected 
+       catch
+           expT_ccw(k)=0;
+       end
+       % still need expS.  Fortunately it is the same
+       phiL(k) = 1/(c(k)+d(k))*(c(k)*expT_cw(k)+d(k)*expT_ccw(k));  % eq (28)
+       phiL(k) = phiL(k) + expS(k); % following defintion in Theorem 3.1
+       
+       % now we can differentiate laplace transforms to get moments
+       phip = diff(phiL(k),lambda);
+       M(k,k) = -P(k,k)*subs(phip,lambda,0); % mean of tau_{0k}
+       S(k,k) =  P(k,k)*subs(diff(phip,lambda),lambda,0); % moment2 of tau_{0k}
+  
+
+          try % 0/0 = 0 
+         expTb(k) = -lambda/G{k+1}(f,f)*G{k+1}(f,1:f-1)*(Gi(1:f-1,1)./(1-[0,x{k+1}(1:end-1)]'));
+          catch
+              expTb(k) = 0;
+          end
+         phiB(k) = expTb(k) + expS(k); % Laplace transform of tau_{k,k+1}
+         %  compute component Laplace transforms for backward jumps
+       
+         if k>1 % computations only valid for lower diagnol 
+            phip = diff(phiB(k-1),lambda);
+        % now we can differentiate laplace transforms to get moments
+          M(k,k-1) = -P(k,k-1)*subs(phip,lambda,0); % mean of tau_{k,k+1}
+          S(k,k-1) =  P(k,k-1)*subs(diff(phip,lambda),lambda,0);
+        end
+end
+
+  iP = inv(eye(n)-P(1:end-1,1:end-1));
+  muT = iP*M*ones(n,1);
+  sigmaT = iP*S*ones(n,1) + 2*(iP*M)^2*ones(n,1);  
+   
+mu = subs(muT(1),{k01,k10,k12,k21,k23,k24,k32,k35,k42,k45,k56,k65,k67,k78},{1,1,1,1,1,1,1,1,1,1,1,1,1,1})
+sigma = subs(sigmaT(1),{k01,k10,k12,k21,k23,k24,k32,k35,k42,k45,k56,k65,k67,k78},{1,1,1,1,1,1,1,1,1,1,1,1,1,1})
+
+
+% for k=1:n
+%     [R{k},Lambda{k}] = eigs(G{k}); % columns of R are the evecs, diagnol of Lambda are the evals  
+% end
+
+% limit rho --> infty
+% E^x[exp(-lambda tau)] = (lambda*I - G)^{-1}_{x,f}/(lambda*I - G)^{-1}_{f,f}  
+% (lambda I - G)^{-1}_{xy} = sum_{i_1..i_k}[(1-lambda prod_k[lambda_{i_k}])^{-1}*
+% prod_k[r^k_{i_k}(x_k) l^k_{i_k}(y_k)]]
+
+
+

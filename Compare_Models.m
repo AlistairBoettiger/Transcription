@@ -1,31 +1,27 @@
 
-%                               model_CompFull2b.m
+%%                              Compare_Model.m
 %
 % Alistair Boettiger                                   Date Begun: 04/06/09
 % Levine Lab                                     Functional Since: 05/05/09
-% Functional computational code                     Last Modified: 11/07/09
+% Functional computational code                     Last Modified: 08/07/10
 
-% Notes:
+%% Notes:
 % compute moment generating function of first passage times for arbitrary
 % pinch point decomposed (series) Markov Chains using Matlab's symbolic
 % Algebra routines
 % This code is complete
-% This code uses codes SeriesDecomp.m
-
 % This code runs the model and produces figure 3 of the main text as it
 % stood on 5-18-10.  It now also loads data from the full probability
-% distribution approach to complete panel D of figure 3.  
+% distribution approach to complete panel D of figure 3. 
+
+%% Required functions
+% This code uses codes SeriesDecomp.m
+
+ 
 % 
-
-
-% Modified 10/18/09 to remove state 0. 
-% Modified 10/20/09 to clean up code
-% Modified 11/07/09 to fix bug k53 and k54 missing (had used k35 and k45)
-% Code relocated to Code folder of Markov Project 03-21-10 
-
 clear all;
-% 
-% Specific Model Constants
+ 
+% Name Specific Model Constants, specify as algebriac variables
 kab = sym('kab','real');
 kba = sym('kba','real');
 k12 = sym('k12','real'); 
@@ -48,14 +44,14 @@ Gen =  [[-kab,kab];  % enhancer chain
        [kba,-kba]];
 
 
-% Submatrices for initiation regulated system
-GI{1} = zeros(3); 
+% ------ Submatrices for initiation regulated system -------- % 
+GI{1} = zeros(3); % Necessary offset for indexing in Series_Decomp.  Keep.
 
-GI{2}=[[-kab,kab,0];
-    [kba, -kba-k12, k12];
+GI{2}=[[-kab,kab,0];       % chain before first pinchpoint
+    [kba, -kba-k12, k12];  
     [0, k21, -k21]];
 
-GI{3}=[[-k23-k24, k23, k24, 0];
+GI{3}=[[-k23-k24, k23, k24, 0]; 
     [k32, -k32-k35, 0, k35];
     [k42, 0, -k42-k45, k45];
     [0, k53, k54, -k53-k54]];
@@ -64,8 +60,9 @@ GI{4} =[[-k56, k56, 0, 0];
     [k65, -k65-k67, k67, 0];
     [0, 0, -k78, k78];
     [0, 0, 0, 0]];
+% -----------------------------------------------------------%  
 
- [m1I,m2I] = SeriesDecomp(GI); 
+ [m1I,m2I] = SeriesDecomp(GI); % first and second moments for tau for IR model
 
 % Submatrices for elongation regulated system 
 GE{1} = zeros(3); 
@@ -87,7 +84,7 @@ GE{4}=[[-k56, k56, 0, 0];
 
  [m1Et,m2Et] = SeriesDecomp(GE); % means without enhnacer yet
 %    
-
+% Rapid equilbirium of enhancer model
 syms lambda;
 f = length(Gen);
 Gen_star = Gen; 
@@ -95,18 +92,20 @@ Gen_star(f,:) = zeros(1,f);
 iGen = inv(lambda*eye(f) - Gen_star);
 mS = -subs(diff(lambda*iGen(1,f),lambda),lambda,0); % mean for enhancer chain 
 m2S = subs(diff(diff(lambda*iGen(1,f),lambda),lambda),lambda,0); % 2nd moment for enhancer chain 
-
 p = kba/(kab+kba); % probability of find ing the system in the final state
-% should be computed directly from the final element of the kernel of the
-% matrix Gen.  Matlab refuses to compute kernel through left divide.  
-m1E = m1Et + mS*(1-p);
-m2E = m2Et + (1-p)*(2*m1Et*mS+m2S); 
 
 
+m1E = m1Et + mS*(1-p);  % First moment of ER model
+m2E = m2Et + (1-p)*(2*m1Et*mS+m2S); % Second moment of ER model
+
+%% Differentiate solutions for Sensitivity Analysis
+
+% Define variables
 %       1    2    3  4    5  6   7  8    9   10  11  12 13  14  15  16
 vars = [k12,k21,k23,k24,k32,k35,k53,k54,k42,k45,k56,k65,k67,k78,kab,kba];
 % vals = [ 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ,.1 , 1 ];
 
+% Compute gradients
  grad_mE = jacobian(m1E,vars);
  grad_sE = jacobian(m2E-m1E^2,vars);
  grad_mI = jacobian(m1I,vars);
@@ -115,7 +114,7 @@ vars = [k12,k21,k23,k24,k32,k35,k53,k54,k42,k45,k56,k65,k67,k78,kab,kba];
  grad_nI = jacobian((m2I-m1I^2)/m1I,vars);
  
  
-% % Print solutions 
+% % Print solutions to Text File (fast method)
  
 %  fid = fopen('modelFull_solns.txt', 'wt');
 % fprintf(fid, ['m1E = ', char(m1E), '\n', '  \n',...
@@ -130,6 +129,7 @@ vars = [k12,k21,k23,k24,k32,k35,k53,k54,k42,k45,k56,k65,k67,k78,kab,kba];
 % convert solutions in symbolic expression to matlab commands with
 % variables for inputs.  This is much faster than 'subs' command, sadly. 
 
+% Print solutions in memory using strfind (much faster than 'subs' command.
 solns = {char(m1E); char(m2E); char(m1I); char(m2I); ...
     char(grad_mE); char(grad_sE); char(grad_nE); char(grad_mI); char(grad_sI); char(grad_nI)};
 for k =1:length(solns) 
@@ -145,13 +145,13 @@ for k =1:length(solns)
 end
 
 
- save modelFull2b_solns;
+% % If you don't want to run this cell again, save it's data
+% save model_solns;
 
 
-
-
-%%
- load modelFull2b_solns;
+%% Explore Parameter Space
+% substitutes in N random draws.
+%  load model_solns;
 
 
 N=10000; 
@@ -165,68 +165,57 @@ for i=1:N
  K56 = rand; K67 = rand; K78 = rand;     Kab = rand; Kba = rand;
  K21 = rand; K32 = rand; K42 = rand; K65 = rand;
  vars(i,:) = [K12,K21,K23,K24,K32,K35,K53,K54,K42,K45,K56,K65,K67,K78,Kab,Kba];
-M1E(i) = eval(solns{1});
-M2E(i) = eval(solns{2});
-M1I(i) = eval(solns{3});
-M2I(i) = eval(solns{4});
-GmE(i,:) = eval(solns{5});
-GsE(i,:) = eval(solns{6});
-GnE(i,:) = eval(solns{7});
-GmI(i,:) = eval(solns{8});
-GsI(i,:) = eval(solns{9});
-GnI(i,:) = eval(solns{10});
+M1E(i) = eval(solns{1});  % ER model, 1st moment i.e. mean
+M2E(i) = eval(solns{2});   % ER model, 2nd moment
+M1I(i) = eval(solns{3}); % IR model, 1st moment
+M2I(i) = eval(solns{4});  % IR model, 2nd moment
+GmE(i,:) = eval(solns{5}); % Sensitivity gradients for mean transition time, ER model
+GsE(i,:) = eval(solns{6}); % Sensitivity gradients for variance in transition time, ER model 
+GnE(i,:) = eval(solns{7}); % Sensitivity gradients for COV transition time, ER model
+GmI(i,:) = eval(solns{8});  % Sensitivity gradients for mean transition time, IR model
+GsI(i,:) = eval(solns{9}); % Sensitivity gradients for variance in transition time, IR model 
+GnI(i,:) = eval(solns{10});  % Sensitivity gradients for COV transition time, IR model
 end
 
-
-
-% save modelFull2b_data2; % 11/03/09
-
-
-M1E = nonzeros(M1E);
+% Get rid of unused cells
+M1E = nonzeros(M1E); 
 M2E = nonzeros(M2E);
 M1I = nonzeros(M1I);
 M2I = nonzeros(M2I);
 
 
+sE = M2E - M1E.^2;  % variance in transition time, ER model
+sI = M2I - M1I.^2; % variance in transition time, IR model
+nE = sE./M1E.^2; % 'noise'/CoV of transition time, ER model
+nI = sI./M1I.^2; % 'noise'/CoV of transition time, IR model
 
-sE = M2E - M1E.^2;
-sI = M2I - M1I.^2;
-nE = sE./M1E.^2;
-nI = sI./M1I.^2;
-nE3 = sE./M1E.^3;
-nI3 = sI./M1I.^3;
 
-dmv = M1I - M1E;
-dsv = sI - sE;
-dnv = nI - nE;
-%dn2 = nI2 - nE2;
+dmv = M1I - M1E; % difference in means
+dsv = sI - sE; % difference in variances
+dnv = nI - nE; % difference in CoV
 
 
 
-rmv = M1I./M1E;
-rsv = sI./sE;
-%rnv = nI./nE;
-rtv = (sI.^2./M1I) ./ (sE.^2./M1E); 
+rmv = M1I./M1E; % ratio of means
+rsv = sI./sE; % ratio of variances
+rtv = (sI.^2./M1I) ./ (sE.^2./M1E); % ratio of CoVs 
 
 
-% rtv = sort(rtv);
-
-% Export Data
-
-
+%% Export Data
+% Necessary for 
 Data = [GmE;GsE;GnE;GmI;GsI;GnI;vars];
 
-fn = '/Users/alistair/Documents/Berkeley/Levine Lab/Data2b.txt';
-
-dlmwrite(fn,Data); 
- %  modelFull2b_data;   11/10/09
- save modelFull2b_data2;  % 11/23/09
-
+% % choose a directory to save too.  
+% fn = '/Users/.../Data2b.txt';
+% dlmwrite(fn,Data); 
+% save model_data2;  % 11/23/09
 
 
 
-%% Figure 3 of Main Text
-load modelFull2b_data2; 
+
+%% Histogram Results
+% As seen in Figure 3 of Main Text
+% load model_data2; 
 offset = .025;
 bins = 70;
 xmax =1 + offset;
@@ -274,7 +263,7 @@ title('Noise in transcript number, \eta','FontSize',F);
 set(gcf,'color','w'); set(gca,'FontSize',F);
 
 
- load compfull_pdist2_data; 
+ load compfull_pdist2_data; % from plot
 subplot(2,2,4); 
  plot(lam/60,FI,'b','LineWidth',2); hold on; 
   plot(lam/60,FE,'r','LineWidth',2);    xlim([0,lam(end)/60]); %ylim([0,1.2E-3]);
@@ -287,7 +276,7 @@ legend('IR Model','ER Model')
 title('PDF for \tau'); 
 
 
-%%
+%% Alternative Plotting of Data in Fig 3
 load modelFull2b_data2; 
 th = .1;
 wm = .005;
@@ -340,7 +329,7 @@ set(gcf,'color','w');
 
 
 
-%% 
+%% Parameter Values Distributions for Parameter Sets with substational IR ER differences.   
 
 i = 0;
 figure(3); clf; figure(4); clf; figure(5); clf;
@@ -378,7 +367,5 @@ figure(5); set(gcf,'color','w');
 
 % save model_results2b
 
-
-%% Export Data
 
 

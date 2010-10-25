@@ -1,0 +1,27 @@
+% Simple model as a control
+function model_simplest
+clear all;
+
+
+
+% Elongation model
+GE{1} = zeros(3);
+GE{2} = [[-1,1,0];
+        [1,-2,1];
+        [0,1, -1]];
+       
+   [m1E, m2E] = SeriesDecomp(GE); 
+
+   T = [[-2,2];
+        [1,-1]];
+
+    [m1,
+    
+    
+function [m1,m2]=FK(T)   
+  f=length(T);
+  G = lambda*inv(lambda*eye(f) - T);
+  phi = G(1,f);  
+  phit = diff(phi,lambda);
+  m1 = -subs(phit,lambda,0)
+  m2 = subs(diff(phit,lambda),lambda,0)
