@@ -230,7 +230,7 @@ subplot(2,2,3);
   set(h,'EdgeColor','none','FaceColor','b');
   ylim([0,4/3*max(nh)]); ylabel('frequency'); 
 xlabel('log_{10}(\eta_{IR}) -log_{10}(\eta_{ER})');  set(gca,'YTickLabel',' ');
-title('Noise in transcript number, \eta','FontSize',F); 
+title('Noise in transcript number, \eta = \sigma^2/\mu','FontSize',F); 
 set(gcf,'color','w'); set(gca,'FontSize',F);
 
 
@@ -264,10 +264,106 @@ set(gcf,'color','w'); set(gca,'FontSize',F);
 
 
 
+%%
+
+%% Figure 3 of Main Text
+
+% load  multiloop2_pdata; % 10/14/10 
+
+ymax = 5000; 
+offset = .025;
+bins = 70;
+xmax =1 + offset;
+xmin = -1;
+m = log10(rmv); s = log10(rsv); n = log10(rtv);
+mb = linspace(xmin,xmax-.025,bins); % max(m)/xmax*bins;
+sb =linspace(xmin,xmax-.025,bins); % max(s)/xmax*bins;
+nb =linspace(xmin,xmax-.025,2*bins); % max(n)/xmax*bins;
+
+
+mp = m(m>0);  mn = m(m<=0);
+sp = s(s>0);  sn = s(s<=0);
+np = n(n>0);  nn = n(n<=0);
+
+r_fano = (sI./M1I.^2) ./ (sE./M1E.^2); 
+fano = log10(r_fano); nf = linspace(xmin,xmax-.025,bins); 
+
+C = [1,.4,.4];
+
+F = 10; 
+
+frac_np = length(nonzeros(np))/length(nonzeros(n));
+
+figure(3); clf; subplot(2,2,1); 
+hist(mp,mb);
+  hold on; % plot([0,0],[0,4/3*ymax],'m--','LineWidth',2);
+  h = findobj(gca,'Type','patch');
+  set(h,'EdgeColor','none','FaceColor','r');
+   hist(mn,mb); xlim([xmin,xmax]);
+ xlabel('log_{10}(\mu_{IR}) - log_{10}(\mu_{ER})'); set(gca,'YTickLabel',' ');
+ ylabel('frequency');  set(gca,'FontSize',F);
+title('Mean Expression Speed, \mu','FontSize',F);
+xlim([xmin,xmax]);    ylim([0,4/3*ymax]);
+
+figure(3); subplot(2,2,2); 
+    hist(sp,sb);
+  hold on; % plot([0,0],[0,4/3*ymax],'m--','LineWidth',2);
+  h = findobj(gca,'Type','patch');   set(h,'EdgeColor','none','FaceColor','r');
+   hist(sn,sb); xlim([xmin,xmax]);
+ xlabel('log_{10}(\mu_{IR}) - log_{10}(\mu_{ER})'); set(gca,'YTickLabel',' ');
+ ylabel('frequency');  set(gca,'FontSize',F);
+title('Variance, \sigma^2','FontSize',F);
+xlim([xmin,xmax]);    ylim([0,4/3*ymax]);
+
+ subplot(2,2,4);
+
+ hist(fano,nf); xlim([xmin,xmax]);
+    nh = hist(n,nf); 
+  hold on; % plot([0,0],[0,4/3*max(nh)],'m--','LineWidth',2);
+  
+    h = findobj(gca,'Type','patch');
+  set(h,'EdgeColor','none','FaceColor','b');
+  ylim([0,max(nh)]); ylabel('frequency'); 
+xlabel('log_{10}(F_{IR}) -log_{10}(F_{ER})');  set(gca,'YTickLabel',' ');
+title('Fano Factor, F = \sigma^2/\mu^2','FontSize',F); 
+set(gcf,'color','w'); set(gca,'FontSize',F);
+
+
+
+subplot(2,2,3);
+
+figure(5); clf;
+ hist(np,nb); 
+  hold on; % plot([0,0],[0,ymax],'m--','LineWidth',2);
+  h = findobj(gca,'Type','patch');   set(h,'EdgeColor','k','FaceColor','r');
+  hist(nn,nb); xlim([xmin,xmax]);
+xlabel('log_{10}(\eta_{IR}) -log_{10}(\eta_{ER})');  set(gca,'YTickLabel',' ');
+title('Noise in transcript number, \eta','FontSize',F); 
+set(gcf,'color','w'); set(gca,'FontSize',F);    ylim([0,ymax]); ylabel('frequency'); 
+legend(['IR > ER ',num2str(frac_np*100,2),'%']);
+
+%  load compfull_pdist2_data; 
+% subplot(2,2,4); 
+%  plot(lam/60,FI,'b','LineWidth',2); hold on; 
+%   plot(lam/60,FE,'r','LineWidth',2);    xlim([0,lam(end)/60]); %ylim([0,1.2E-3]);
+% % title(['\mu_{ER} = ',num2str(mean_E,2), ' \sigma_{ER} = ', num2str(std_E,2),  ...
+% %     '       \mu_{IR} = ',num2str(mean_I,2), ' \sigma_{IR} = ', num2str(std_I,2),...
+% %     '  minutes'],'FontSize',15);
+%  xlabel('time (minutes)','FontSize',F); 
+% set(gca,'FontSize',F); set(gcf,'color','w');
+% legend('IR Model','ER Model')
+% title('PDF for \tau'); 
+
+
+
+
+
+
+
 
 %%
-load  multiloop2_pdata;
-th = .1;
+% load  multiloop2_pdata;
+th = 0;
 wm = .005;
 m = log10(rmv); mr = m(m<=th); mb = m(m>th);
 rb = round(th/wm); 

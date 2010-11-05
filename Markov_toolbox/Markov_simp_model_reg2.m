@@ -59,10 +59,10 @@ GI{2} =[[-kab,kab,0,0,0];
 GE{1} = zeros(3);
 %            1A 2A 3A  1B  2B  3B   4 
 GE{2} = [[-k12-kab, k12,    kab,    0,  0,  0];       % 1A
-        [k21,   -k21-kab-k23,   0,    kab,    0,  0];  % 2A
+        [k21,   -k21-kab,   0,    kab,    0,  0];  % 2A
         [kba,0,-kba-k12,k12,0,0];        % 1B
         [0,kba,k21,-kba-k21-k23,k23,0];  % 2B
-        [0,0,0,0,-k34-kba,k34] ;       % 3B
+        [0,0,0,0,-k34,k34] ;       % 3B
         [0,0,0,0,0,0]];                  % 4   
     
         
@@ -72,7 +72,7 @@ GE{2} = [[-k12-kab, k12,    kab,    0,  0,  0];       % 1A
    vars = [k12,k21,k23,k34,kab,kba];
    vals = [1,1,1,1,1,1];
 
-   save model_simpIvE_reg2 m1E m2E m1I m2I; 
+   save model_simpIvE_reg3 m1E m2E m1I m2I; 
    % load model_simpIvE
 
    % Senstivity Analysis
@@ -93,13 +93,13 @@ GE{2} = [[-k12-kab, k12,    kab,    0,  0,  0];       % 1A
  nI = vI./m1I;
  nE = vE./m1E;
  
- save Markov_simp_data_reg2 m1E m2E m1I m2I vI vE nI nE; 
+ save Markov_simp_data_reg3 m1E m2E m1I m2I vI vE nI nE; 
 
 %% Convert Solutions to text form
 % This is a work-around for the 'subs' function, which is functional but
 % extremely, phenomenally slow compared to 'eval'.  
 
-load Markov_simp_data_reg2;
+load Markov_simp_data_reg3;
 
  solns = {char(m1E); char(m2E); char(m1I); char(m2I); ...
     char(vE); char(vI); char(nE); char(nI)};
@@ -115,11 +115,11 @@ for k =1:length(solns)
 %      end
 end
  
- save Markov_simp_solns_reg2 solns vars;
+ save Markov_simp_solns_reg3 solns vars;
 
 %% Explore parameter space
 
-load Markov_simp_solns_reg2; 
+load Markov_simp_solns_reg3; 
 
 N=5000; 
 P = 6; 
@@ -145,13 +145,16 @@ dN(i) = eval(solns{8}) / eval(solns{7});
 % GnI(i,:) = eval(solns{10});
 end
 
- save Markov_simp_dist_reg2b;
+ % save Markov_simp_dist_reg2b;
+% save Markov_simp_dist_reg3;
 %%
 % load Markov_simp_dist_rev;  vmax = 4500; 
 % load Markov_simp_dist_reg2;
 
-xmin = -4;
-xmax = 5; 
+% load  Markov_simp_dist_reg3;
+
+xmin = -2;
+xmax = 2; 
 x = linspace(xmin,xmax,50); vmax = 900; 
 
 
@@ -168,20 +171,34 @@ subplot(3,1,1); hist(log(dM),x);
    title('simple model: variance in delay')
 
 subplot(3,1,3); hist(log(dN),x);
- hold on; plot([0,0],[0,vmax],'r--');
- xlabel('log(\eta_{IR}/\eta_{ER})');  ylim([0,vmax]); xlim([xmin,xmax]);
+ hold on; plot([0,0],[0,1.5*vmax],'r--');
+ xlabel('log(\eta_{IR}/\eta_{ER})');  ylim([0,1.5*vmax]); xlim([xmin,xmax]);
  title('simple model: varibility in transcripts'); 
  
- IR_better = log(dM)<0;
- 
- var_names = {'K12','K21','K23','K34','Kab','Kba'};
- xx = linspace(0,1,20);
+
+  var_names = {'K12','K21','K23','K34','Kab','Kba'};
+ xx = linspace(0,1,10);
  figure(3); clf; set(gcf,'color','w'); 
+ kk = 0;
+  IR_better = log(dM)<-.5;
  for k=1:6
-    subplot(6,1,k); hist(vars(IR_better,k),xx); xlim([0,1]); xlim([xmin,xmax]);
+     kk = kk+1;
+    subplot(3,6,kk); hist(vars(IR_better,k),xx); xlim([0,1]); xlim([xmin,xmax]);
     title(var_names{k}); xlim([-.05,1.05]);
  end
-
+ IR_better = log(dV)<-.5;
+  for k=1:6
+     kk = kk+1;
+    subplot(3,6,kk); hist(vars(IR_better,k),xx); xlim([0,1]); xlim([xmin,xmax]);
+    title(var_names{k}); xlim([-.05,1.05]);
+  end
+  IR_better = log(dN)<-.3;
+   for k=1:6
+     kk = kk+1;
+    subplot(3,6,kk); hist(vars(IR_better,k),xx); xlim([0,1]); xlim([xmin,xmax]);
+    title(var_names{k}); xlim([-.05,1.05]);
+ end
+ 
  
  %%
  rmv = dM; rsv = dV;  rnv = dN;

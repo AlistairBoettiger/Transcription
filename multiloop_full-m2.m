@@ -266,8 +266,8 @@ set(gcf,'color','w'); set(gca,'FontSize',F);
 
 
 %%
-load  multiloop2_pdata;
-th = .1;
+% load  multiloop2_pdata;
+th = 0;
 wm = .005;
 m = log10(rmv); mr = m(m<=th); mb = m(m>th);
 rb = round(th/wm); 

@@ -6,7 +6,7 @@
 % Direct Feynman-Kac substitution to solve simple model
 
 clear all;
-
+tic 
 % % parameters
 kab = sym('kab','real');
 kba = sym('kba','real');
@@ -46,3 +46,4 @@ mE = -subs(dPhiE,lambda,0);
  PhiI =    lambda.*inv(lambda*eye(5) - (GI)); 
  dPhiI = diff(PhiI(1,5),lambda);
 mI = -subs(dPhiI,lambda,0);
+toc
