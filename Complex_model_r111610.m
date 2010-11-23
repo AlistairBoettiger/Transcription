@@ -118,6 +118,8 @@ m1E = m1Et + mS*(1-p);
 m2E = m2Et + (1-p)*(2*m1Et*mS+m2S); 
 
 
+save modelFull2b_solns;
+
 %       1    2    3  4    5  6   7  8    9   10  11  12 13  14  15  16
 vars = [k12,k21,k23,k24,k32,k35,k53,k54,k42,k45,k56,k65,k67,k78,kab,kba];
 % vals = [ 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ,.1 , 1 ];
@@ -186,7 +188,7 @@ end
 
 
 %%
-load complex_solns_gradsVN;
+% load complex_solns_gradsVN;
  tic
 
  % .04*N seconds in mupad
