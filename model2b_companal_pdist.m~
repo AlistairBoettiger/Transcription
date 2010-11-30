@@ -39,7 +39,10 @@ lambda = sym('lambda','real');
 pars =   [  k12,      k21,   k23,      k24,     k32,    k35,    k53,    k54,     k42,       k45,     k56,     k65,    k67,       k78,   kab,   kba];         
 % vals = 10*[6*.0216, 6*.145, 6*.0216, 6*.0216, 6*.145, 6*.0216 6*.145,  6*.145,  6*.0216,  6*.0216,  3*.00159, .001,  3*.00159,  3*.00159,.001, .1, ];
 
-  vals = 5*[.0216, .145, 2, 2, 2, 2, 2,  2,  2,  2,  .00159, .001,  2,  2,.01, 1 ];
+  % vals = 5*[.0216, .145, 2, 2, 2, 2, 2,  2,  2,  2,  .00159, .1,  2,  2,.01, 1 ];
+  
+
+  vals = [.216, .145, 2, 2, 2, 2, 2,  2,  2,  2,  .159, .1,  2,  2,.1, 1 ];  % extreme case. 
 
 % vals = rand(16,1);
 
@@ -54,7 +57,7 @@ fIs = char(fI(1));
 fIs = strrep(fIs,'*','.*');
 fIs = strrep(fIs,'/','./');
 fIs = strrep(fIs,'^','.^');
-lambda = linspace(1E-8,4E2,1000); 
+lambda = linspace(1E-8,4E3,1000); 
 
 fIv = eval(fIs);  
 fIl = fIv(fIv>0);
@@ -66,8 +69,11 @@ fIl = fIv(fIv>0);
 
 % lE = subs(fE(1),lambda,2);
 
-     % lam = linspace(1E-5,4E3,1000); 
-      lam = linspace(10,3E3,1000); 
+
+   %   lam = linspace(10,4E4,1000); 
+      
+        lam = linspace(10,4E3,1000);   % for extreme case
+        
 % Here we actually numerically invert the Laplace space solutions of the
 % model.  
    FI = invlap2(fI(1), lam'); 
@@ -89,7 +95,9 @@ std_E =  sqrt(lam.^2*FE*dt -  (lam*FE*dt)^2)/60
 std_I = sqrt(lam.^2*FI*dt - (lam*FI*dt)^2)/60
 
 
-save compfull_pdist3_data; 
+  save compfull_pdist_simdata_X2; 
+
+% load  compfull_pdist3_data;
 
  figure(1); clf; plot(lam/60,FI,'b','LineWidth',2); hold on; 
   plot(lam/60,FE,'r','LineWidth',2);    xlim([0,lam(end)/60]); %ylim([0,1.2E-3]);

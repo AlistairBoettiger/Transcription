@@ -295,55 +295,61 @@ load complex_data-10-28-10;
  kba_slow = vars(:,16) < .1*slowR';
  noneq = kab_slow | kba_slow;
  
- rmv2 = rmv(~noneq);
- rsv2 = rsv(~noneq); 
- rtv2 = rtv(~noneq); 
+%  rmv2 = rmv(~noneq);
+%  rsv2 = rsv(~noneq); 
+%  rtv2 = rtv(~noneq); 
 
+% Peter recommends no truncation
+ rmv2 = rmv;
+ rsv2 = rsv; 
+ rtv2 = rtv; 
  
-offset = .025;
+offset = .1;
 bins = 70;
-xmax =1 + offset;
-m = log10(rmv2); s = log10(rsv2); n = log10(rtv2);
-mb = linspace(-.2,xmax-.025,bins); % max(m)/xmax*bins;
-sb =linspace(-.2,xmax-.025,bins); % max(s)/xmax*bins;
-nb =linspace(-.2,xmax-.025,bins); % max(n)/xmax*bins;
-fano = log10(r_fano); nf = linspace(-1,xmax-.025,bins); 
+xmax = 3;
+xmin = -1; 
+m = log2(rmv2); s = log2(rsv2); n = log2(rtv2);
+xs = linspace(xmin,xmax,bins); 
+% fano = log2(r_fano); nf = linspace(-1,xmax-.025,bins); 
 
-C = [1,.4,.4];
+
 
 F = 10; 
 
-figure(3); clf; subplot(2,2,1); hist(m,mb);
-  mh = hist(m,mb); xlim([-.2,xmax]);
-  hold on; plot([0,0],[0,4/3*max(mh)],'m--','LineWidth',2);
-  ylim([0,4/3*max(mh)]);
+figure(3); clf; 
+subplot(2,2,1);
+mp = m(m>0); 
+mn = m(m<0); 
+hist(mn,xs);
   h = findobj(gca,'Type','patch');
-  set(h,'EdgeColor','none','FaceColor','b');
- xlabel('log_{10}(\mu_{IR}) - log_{10}(\mu_{ER})'); set(gca,'YTickLabel',' ');
+  set(h,'EdgeColor','none','FaceColor','r'); hold on;
+ hist(mp,xs); 
+  xlim([xmin-offset,xmax+offset]);  
+ xlabel('log_{2}(\mu_{IR}/\mu_{ER})'); set(gca,'YTickLabel',' ');
  ylabel('frequency');  set(gca,'FontSize',F);
 title('Mean Expression Speed, \mu','FontSize',F);
 
 subplot(2,2,2);
- hist(s,sb); xlim([-.2,xmax]);
-   sh = hist(s,sb); 
-  hold on; plot([0,0],[0,4/3*max(sh)],'m--','LineWidth',2);
-    h = findobj(gca,'Type','patch');
-  set(h,'EdgeColor','none','FaceColor','b');
-  ylabel('frequency'); 
-  ylim([0,4/3*max(sh)]);
-xlabel('log_{10}(\sigma^2_{IR}) - log_{10}(\sigma^2_{ER})');  set(gca,'YTickLabel',' ');
+sp = s(s>0);
+sn = s(s<0);
+ hist(sn,xs); 
+  h = findobj(gca,'Type','patch');
+  set(h,'EdgeColor','none','FaceColor','r'); hold on;
+ hist(sp,xs); 
+  xlim([xmin-offset,xmax+offset]); 
+xlabel('log_{2}(\sigma^2_{IR}/\sigma^2_{ER})');  set(gca,'YTickLabel',' ');
 title('Variance in Expression Timing, \sigma^2','FontSize',F); set(gca,'FontSize',F);
 
 
 subplot(2,2,3);
- hist(n,nb); xlim([-.2,xmax]);
-    nh = hist(n,nb); 
-  hold on; plot([0,0],[0,4/3*max(nh)],'m--','LineWidth',2);
-  
-    h = findobj(gca,'Type','patch');
-  set(h,'EdgeColor','none','FaceColor','b');
-  ylim([0,4/3*max(nh)]); ylabel('frequency'); 
-xlabel('log_{10}(\eta_{IR}) -log_{10}(\eta_{ER})');  set(gca,'YTickLabel',' ');
+np = n(n>0);
+nn = n(n<0);
+ hist(nn,xs); hold on;
+     h = findobj(gca,'Type','patch');
+  set(h,'EdgeColor','none','FaceColor','r');
+ hist(np,xs); 
+  xlim([xmin-offset,xmax+offset]); 
+xlabel('log_{2}(\eta_{IR}/\eta_{ER})');  set(gca,'YTickLabel',' ');
 title('Noise in transcript number, \eta','FontSize',F); 
 set(gcf,'color','w'); set(gca,'FontSize',F);
 

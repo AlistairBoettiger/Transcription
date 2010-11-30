@@ -51,64 +51,22 @@ m2E_58 = m2Et + (1-p)*(2*m1Et*mS+m2S); % Second moment of ER model
  %% 
  load multiloop_data;
  
-load complex_data-10-28-10;
-
- 
- b = .5; 
- % b probability of looping back to start. 
- 
- m1bE = b*m1E + (1-b)*m1E_58;
- 
- m1bI = b*m1I + (1-b)*m1I_58;
- 
-s2bE =  m2E_58^2 - (b^2*m1E + (1-b)^2*m1E_58^2 + 2*b*(1-b)*m1E*m1E_58^2);
- 
-s2bI =  m2I_58^2 - (b^2*m1I + (1-b)^2*m1I_58^2 + 2*b*(1-b)*m1I*m1I_58^2);
-
-nbE = s2bE/m1bE;
-
-nbI = s2bI/m1bI; 
- 
-  save multiloop_data_bp5; 
-%%
-
-load multiloop_data_bp5;
 
 
-m1E =  m1bE;
-s2E = s2bE;
-m1I =  m1bI;
-s2I = s2bI;
+m1E =  m1E_58;
+m2E = m2E_58;
+m1I =  m1I_58;
+m2I = m2I_58;
  
 clear m1E_58 m2E_58 m1I_58 m2I_58 v vI vE
 
 % Define variables
 %       1    2    3  4    5  6   7  8    9   10  11  12 13  14  15  16
 vars = [k12,k21,k23,k24,k32,k35,k53,k54,k42,k45,k56,k65,k67,k78,kab,kba];
-% vals = [ 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 ,.1 , 1 ];
 
-% Compute gradients
-% grad_nE = jacobian((m2E-m1E^2)/m1E,vars);
-%  grad_nI = jacobian((m2I-m1I^2)/m1I,vars);
- 
- 
-% % Print solutions to Text File (fast method)
- 
-%  fid = fopen('modelFull_solns.txt', 'wt');
-% fprintf(fid, ['m1E = ', char(m1E), '\n', '  \n',...
-%     'm2E = ', char(m2E), '\n', '  \n',...
-%     'm1I = ', char(m1I), '\n', '  \n',...
-%     'm2I = ', char(m2I), '\n', '  \n',...
-%     'grad_mE = ', char(grad_mE), '\n', '  \n',...
-%     'grad_mI = ', char(grad_mI), '\n', '  \n',...    
-%     ]  );
-% fclose(fid);
-
-% convert solutions in symbolic expression to matlab commands with
-% variables for inputs.  This is much faster than 'subs' command, sadly. 
 
 % Print solutions in memory using strfind (much faster than 'subs' command.
-solns = {char(m1E); char(s2E); char(m1I); char(s2I)};% ; ...
+solns = {char(m1E); char(m2E); char(m1I); char(m2I)};% ; ...
     % char(grad_nE); char(grad_nI)};
 for k =1:length(solns) 
     solns{k}(strfind(solns{k},'k'))='K';
@@ -124,41 +82,50 @@ end
 
 
 % % If you don't want to run this cell again, save it's data
- save multiloop_solns_bp5;
+ save loop58_data;
 
 
 %% Explore Parameter Space
 % substitutes in N random draws.
 %  
 
-load multiloop_solns_bp5;
+tic
+load loop58_data;
+solns58 = solns; % rename to avoid overwriting
 
-N=1000; 
+load complex_data-10-28-10 vars; % load vars used in tau_18 calculation
+
+
+N=length(vars); 
 P = 16; 
-M1E = zeros(N,1); S2E = M1E; M1I = M1E; S2I = M1E; 
-vars = zeros(N,P); 
+ M1E = zeros(N,1); M2E = M1E; M1I = M1E; M2I = M1E; 
 
+% These are momemnts now not standard deviations. 
 
+% use same vars 
 
-for i=1:N
- K12 = rand; K23 = rand; K24 = rand;  K35 = rand;  K45 = rand; K53=rand; K54=rand;
- K56 = rand; K67 = rand; K78 = rand;     Kab = rand; Kba = rand;
- K21 = rand; K32 = rand; K42 = rand; K65 = rand;
- vars(i,:) = [K12,K21,K23,K24,K32,K35,K53,K54,K42,K45,K56,K65,K67,K78,Kab,Kba];
-M1E(i) = eval(solns{1});  % ER model, 1st moment i.e. mean
-S2E(i) = eval(solns{2});   % ER model, 2nd moment
-M1I(i) = eval(solns{3}); % IR model, 1st moment
-S2I(i) = eval(solns{4});  % IR model, 2nd moment
+for i=1:N ; 
+ K12 = vars(i,1);  K21 = vars(i,2); K23 = vars(i,3); K24 = vars(i,4); K32 = vars(i,5); K35 = vars(i,6);
+ K53=vars(i,7); K54=vars(i,8); K42 = vars(i,9);  K45 = vars(i,10);
+ K56 = vars(i,11); K65 = vars(i,12);  K67 = vars(i,13); K78 = vars(i,14);  Kab = vars(i,15); Kba = vars(i,16);
+% vars(i,:) = [K12,K21,K23,K24,K32,K35,K53,K54,K42,K45,K56,K65,K67,K78,Kab,Kba];
+M1E(i) = eval(solns58{1});  % ER model, 1st moment i.e. mean
+M2E(i) = eval(solns58{2});   % ER model, 2nd moment
+M1I(i) = eval(solns58{3}); % IR model, 1st moment
+M2I(i) = eval(solns58{4});  % IR model, 2nd moment
+%M2E(i)
 end
 
 
 
-% Get rid of unused cells
-M1E = nonzeros(M1E); 
-S2E = nonzeros(S2E);
-M1I = nonzeros(M1I);
-S2I = nonzeros(S2I);
+% % Get rid of unused cells
+% M1E = nonzeros(M1E); 
+% M2E = nonzeros(S2E);
+% M1I = nonzeros(M1I);
+% M2I = nonzeros(S2I);
 
+S2E = M2E - M1E.^2;
+S2I = M2I - M1I.^2; 
 
 nE = S2E./M1E.^2; % 'noise'/CoV of transition time, ER model
 nI = S2I./M1I.^2; % 'noise'/CoV of transition time, IR model
@@ -173,41 +140,75 @@ dnv = nI - nE; % difference in CoV
 rmv = M1I./M1E; % ratio of means
 rsv = S2I./S2E; % ratio of variances
 rtv = nI ./ nE; % ratio of CoVs 
+toc
 
+save multiloop_pdata; 
+%%
+load multiloop_pdata;
+ 
 
+M1E_58 = M1E;
+M2E_58 = M2E;
 
- save multiloop_pdata_bp5;
+M1I_58 = M1I;
+M2I_58 = M2I;
+
+load complex_data-10-28-10
+
+M2E_18 = s2E + M1E.^2; 
+M2I_18 = s2I + M1I.^2;
+M1E_18 = M1E;
+M1I_18 = M1I; 
+
+save multiloop_pre_b_data; 
+%%
+load multiloop_pre_b_data; 
+xmin = -1; xmax = 2; bins = 60;
+
+% the correct way to do this, with function calls.  
+
+hout = figure(2); clf; 
+subplot(1,4,1); b = 0; 
+plotbdist(M1E_18,M2E_18,M1E_58,M2E_58,M1I_18,M2I_18,M1I_58,M2I_58,b,xmin,xmax,bins)
+
+figure(2); subplot(1,4,2); b = .1;
+plotbdist(M1E_18,M2E_18,M1E_58,M2E_58,M1I_18,M2I_18,M1I_58,M2I_58,b,xmin,xmax,bins)
+
+figure(2); subplot(1,4,3);  b = .7;
+plotbdist(M1E_18,M2E_18,M1E_58,M2E_58,M1I_18,M2I_18,M1I_58,M2I_58,b,xmin,xmax,bins)
+
+figure(2); subplot(1,4,4);  b = 1;
+plotbdist(M1E_18,M2E_18,M1E_58,M2E_58,M1I_18,M2I_18,M1I_58,M2I_58,b,xmin,xmax,bins)
+
+set(gcf,'color','w');
+% saveas(hout,[fout,'/scaffold_effects.ai']); 
+
 
 %%
-load multiloop_pdata_bp5;
- 
- slowR = min(vars(:,1:14)');
- rtv(rtv<0) = 1E-10; 
- 
- kab_slow = vars(:,15) < .1*slowR';
- kba_slow = vars(:,16) < .1*slowR';
- noneq = kab_slow | kba_slow;
- 
- rmv2 = rmv(~noneq);
- rsv2 = rsv(~noneq); 
- rtv2 = rtv(~noneq); 
 
- 
- 
-offset = .025;
-bins = 70;
-xmax =2 + offset;
+S2I_58 = M2I_58 - M1I_58.^2;
+S2E_58 = M2E_58 - M1E_58.^2;
+
+NI_58 = S2I_58./M2I_58;
+NE_58 = S2E_58./M2E_58;
+
+rmv2 = M1I_58./M1E_58;
+rsv2 = S2I_58./S2E_58;
+rtv2 = NI_58./NE_58 ;
+
+bins = 200; 
 m = log10(rmv2); s = log10(rsv2); n = log10(rtv2);
-mb = linspace(-2,xmax-.025,bins); % max(m)/xmax*bins;
-sb =linspace(-2,xmax-.025,bins); % max(s)/xmax*bins;
-nb =linspace(-2,xmax-.025,bins); % max(n)/xmax*bins;
+mb = linspace(xmin,xmax-.025,bins); % max(m)/xmax*bins;
+sb =linspace(xmin,xmax-.025,bins); % max(s)/xmax*bins;
+nb =linspace(xmin,xmax-.025,bins); % max(n)/xmax*bins;
+fano = log10(r_fano); nf = linspace(-1,xmax-.025,bins); 
 
 C = [1,.4,.4];
 
 F = 10; 
 
-figure(3); clf; subplot(2,2,1); hist(m,mb);
-  mh = hist(m,mb); xlim([-2,xmax]);
+figure(3); clf; subplot(3,1,1); hist(m,mb);
+  mh = hist(m,mb); xlim([xmin,xmax]);
   hold on; plot([0,0],[0,4/3*max(mh)],'m--','LineWidth',2);
   ylim([0,4/3*max(mh)]);
   h = findobj(gca,'Type','patch');
@@ -216,8 +217,8 @@ figure(3); clf; subplot(2,2,1); hist(m,mb);
  ylabel('frequency');  set(gca,'FontSize',F);
 title('Mean Expression Speed, \mu','FontSize',F);
 
-subplot(2,2,2);
- hist(s,sb); xlim([-2,xmax]);
+subplot(3,1,2);
+ hist(s,sb); xlim([xmin,xmax]);
    sh = hist(s,sb); 
   hold on; plot([0,0],[0,4/3*max(sh)],'m--','LineWidth',2);
     h = findobj(gca,'Type','patch');
@@ -228,8 +229,8 @@ xlabel('log_{10}(\sigma^2_{IR}) - log_{10}(\sigma^2_{ER})');  set(gca,'YTickLabe
 title('Variance in Expression Timing, \sigma^2','FontSize',F); set(gca,'FontSize',F);
 
 
-subplot(2,2,3);
- hist(n,nb); xlim([-2,xmax]);
+subplot(3,1,3);
+ hist(n,nb); xlim([xmin,xmax]);
     nh = hist(n,nb); 
   hold on; plot([0,0],[0,4/3*max(nh)],'m--','LineWidth',2);
   
@@ -240,18 +241,3 @@ xlabel('log_{10}(\eta_{IR}) -log_{10}(\eta_{ER})');  set(gca,'YTickLabel',' ');
 title('Noise in transcript number, \eta','FontSize',F); 
 set(gcf,'color','w'); set(gca,'FontSize',F);
 
-
-%  load compfull_pdist3_data; 
-% 
-%  
-% subplot(2,2,4); 
-%  plot(lam/60,FI,'b','LineWidth',2); hold on; 
-%   plot(lam/60,FE,'r','LineWidth',2);    xlim([0,lam(end)/60]); %ylim([0,1.2E-3]);
-% % title(['\mu_{ER} = ',num2str(mean_E,2), ' \sigma_{ER} = ', num2str(std_E,2),  ...
-% %     '       \mu_{IR} = ',num2str(mean_I,2), ' \sigma_{IR} = ', num2str(std_I,2),...
-% %     '  minutes'],'FontSize',15);
-%  xlabel('time (minutes)','FontSize',F); 
-% set(gca,'FontSize',F); set(gcf,'color','w');
-% legend('IR Model','ER Model')
-% title('PDF for \tau'); 
-% 
