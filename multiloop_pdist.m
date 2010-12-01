@@ -137,7 +137,7 @@ Ntot = max(H(:));
 
 %% Draw from density functions 
 
-Tmax = 600; b = .2;
+Tmax = 600; b = .02; % prob return to state 1
 
     % simulate draws under the ER Model
     NE = zeros(1,Ntot); 
@@ -305,7 +305,7 @@ figure(1); subplot(1,2,2); imshow(Izoom_IR);
 title(['IR scheme:  ' ,num2str(mean(NI),2),' +/- ',num2str(std(NI),2),...
     '  transcripts'] );
 %   
-  imwrite(Izoom_ER,[fout,'DX_ER_pred.tif'],'tif'); 
-  imwrite(Izoom_IR,[fout,'DX_IR_pred.tif'],'tif'); 
+%   imwrite(Izoom_ER,[fout,'DX_ER_pred.tif'],'tif'); 
+%   imwrite(Izoom_IR,[fout,'DX_IR_pred.tif'],'tif'); 
 
   

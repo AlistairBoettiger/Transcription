@@ -158,6 +158,8 @@ title(['IR scheme:  ' ,num2str(mean(NI),2),' +/- ',num2str(std(NI),2),...
 
 
 
+
+
 % title(['IR scheme, \mu= ',num2str(mean(NI),2),'  \sigma= ',num2str(std(NI),2),...
 %     '  \sigma/\mu: ',num2str(std(NI)/mean(NI),2) ]);
 

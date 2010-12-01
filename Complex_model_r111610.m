@@ -356,8 +356,9 @@ set(gcf,'color','w'); set(gca,'FontSize',F);
 
  load compfull_pdist3_data; 
 
+ figure(1); clf;
  
-subplot(2,2,4); 
+% subplot(2,2,4); 
  plot(lam/60,FI,'b','LineWidth',2); hold on; 
   plot(lam/60,FE,'r','LineWidth',2);    xlim([0,lam(end)/60]); %ylim([0,1.2E-3]);
 % title(['\mu_{ER} = ',num2str(mean_E,2), ' \sigma_{ER} = ', num2str(std_E,2),  ...

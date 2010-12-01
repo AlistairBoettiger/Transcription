@@ -124,5 +124,5 @@ figure(1); subplot(1,2,2); imshow(Izoom_IR);
 title(['IR scheme:  ' ,num2str(mean(mRNA_I),2),' +/- ',num2str(std(mRNA_I),2),...
     '  transcripts'] );
 %   
- imwrite(Izoom_ER,[fout,'mu',num2str(mu_NE,2),'sigma',num2str(sigma_NE,2),'.tif'],'tif'); 
- imwrite(Izoom_IR,[fout,'mu',num2str(mu_NI,2),'sigma',num2str(sigma_NI,2),'.tif'],'tif'); 
+%  imwrite(Izoom_ER,[fout,'mu',num2str(mu_NE,2),'sigma',num2str(sigma_NE,2),'.tif'],'tif'); 
+%  imwrite(Izoom_IR,[fout,'mu',num2str(mu_NI,2),'sigma',num2str(sigma_NI,2),'.tif'],'tif'); 

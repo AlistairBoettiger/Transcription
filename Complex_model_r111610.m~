@@ -304,15 +304,15 @@ load complex_data-10-28-10;
  rsv2 = rsv; 
  rtv2 = rtv; 
  
-offset = .025;
+offset = .1;
 bins = 70;
 xmax = 3;
 xmin = -1; 
 m = log2(rmv2); s = log2(rsv2); n = log2(rtv2);
 xs = linspace(xmin,xmax,bins); 
-fano = log2(r_fano); nf = linspace(-1,xmax-.025,bins); 
+% fano = log2(r_fano); nf = linspace(-1,xmax-.025,bins); 
 
-C = [1,.4,.4];
+
 
 F = 10; 
 
@@ -348,7 +348,7 @@ nn = n(n<0);
      h = findobj(gca,'Type','patch');
   set(h,'EdgeColor','none','FaceColor','r');
  hist(np,xs); 
-  xlim([xmin-.2,xmax+offset]); 
+  xlim([xmin-offset,xmax+offset]); 
 xlabel('log_{2}(\eta_{IR}/\eta_{ER})');  set(gca,'YTickLabel',' ');
 title('Noise in transcript number, \eta','FontSize',F); 
 set(gcf,'color','w'); set(gca,'FontSize',F);
@@ -356,8 +356,9 @@ set(gcf,'color','w'); set(gca,'FontSize',F);
 
  load compfull_pdist3_data; 
 
+ figure(1); clf;
  
-subplot(2,2,4); 
+% subplot(2,2,4); 
  plot(lam/60,FI,'b','LineWidth',2); hold on; 
   plot(lam/60,FE,'r','LineWidth',2);    xlim([0,lam(end)/60]); %ylim([0,1.2E-3]);
 % title(['\mu_{ER} = ',num2str(mean_E,2), ' \sigma_{ER} = ', num2str(std_E,2),  ...
