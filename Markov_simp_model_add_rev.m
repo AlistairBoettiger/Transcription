@@ -138,7 +138,8 @@ end
 %%
 % load Markov_simp_dist_rev;  vmax = 4500; 
 % load Markov_simp_dist_rev2; 
-load Markov_simp_dist_addrev;
+load Markov_simp_dist_addrev;  % add k32.  
+% save plotdata_addk32
 
 x = linspace(-4,18,150); vmax = 9000; 
 

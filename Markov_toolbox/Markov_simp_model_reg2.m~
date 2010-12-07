@@ -151,8 +151,10 @@ end
 % load Markov_simp_dist_rev;  vmax = 4500; 
 % load Markov_simp_dist_reg2;
 
-% load  Markov_simp_dist_reg3;
+ load  Markov_simp_dist_reg3;
 
+ save plotdata_regk23
+ 
 xmin = -2;
 xmax = 2; 
 x = linspace(xmin,xmax,50); vmax = 900; 
@@ -177,26 +179,26 @@ subplot(3,1,3); hist(log(dN),x);
  
 
   var_names = {'K12','K21','K23','K34','Kab','Kba'};
- xx = linspace(0,1,10);
+ xx = linspace(0,1,6);
  figure(3); clf; set(gcf,'color','w'); 
  kk = 0;
   IR_better = log(dM)<-.5;
  for k=1:6
      kk = kk+1;
     subplot(3,6,kk); hist(vars(IR_better,k),xx); xlim([0,1]); xlim([xmin,xmax]);
-    title(var_names{k}); xlim([-.05,1.05]);
+    title(['\mu ', var_names{k}]); xlim([-.05,1.05]);
  end
  IR_better = log(dV)<-.5;
   for k=1:6
      kk = kk+1;
     subplot(3,6,kk); hist(vars(IR_better,k),xx); xlim([0,1]); xlim([xmin,xmax]);
-    title(var_names{k}); xlim([-.05,1.05]);
+    title(['\sigma^2 ', var_names{k}]); xlim([-.05,1.05]);
   end
   IR_better = log(dN)<-.3;
    for k=1:6
      kk = kk+1;
     subplot(3,6,kk); hist(vars(IR_better,k),xx); xlim([0,1]); xlim([xmin,xmax]);
-    title(var_names{k}); xlim([-.05,1.05]);
+    title(['\eta ', var_names{k}]); xlim([-.05,1.05]);
  end
  
  

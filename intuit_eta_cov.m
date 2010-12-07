@@ -2,13 +2,19 @@
 %% Intuit eta
 clear all; 
 
-     
+
+
+% 
 fout = '/Users/alistair/Documents/Berkeley/Levine_Lab/Projects/Markov Modeling/Results/';
  folder =  '/Volumes/Data/Lab Data/Shadow_data/Processed'; 
   base_emb = 'MP05xYW_30C_sna_y-full03_data.mat';
   % base_emb = 'SogP_C81_22C_LacZ_sog11_data.mat';
 load([folder,'/',base_emb]); 
 
+
+save Cell_data H Nuc_cntr Nuc_line all_nucs; 
+clear all;
+load Cell_data; 
 
     Ntot = max(H(:));
     [h,w] = size(H); 

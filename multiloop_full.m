@@ -168,16 +168,16 @@ xmin = -1; xmax = 2; bins = 60;
 % the correct way to do this, with function calls.  
 
 hout = figure(2); clf; 
-subplot(1,4,1); b = 0; 
+subplot(1,4,1); b = 1; 
 plotbdist(M1E_18,M2E_18,M1E_58,M2E_58,M1I_18,M2I_18,M1I_58,M2I_58,b,xmin,xmax,bins)
 
-figure(2); subplot(1,4,2); b = .1;
+figure(2); subplot(1,4,2); b = .9;
 plotbdist(M1E_18,M2E_18,M1E_58,M2E_58,M1I_18,M2I_18,M1I_58,M2I_58,b,xmin,xmax,bins)
 
-figure(2); subplot(1,4,3);  b = .7;
+figure(2); subplot(1,4,3);  b = .3;
 plotbdist(M1E_18,M2E_18,M1E_58,M2E_58,M1I_18,M2I_18,M1I_58,M2I_58,b,xmin,xmax,bins)
 
-figure(2); subplot(1,4,4);  b = 1;
+figure(2); subplot(1,4,4);  b = 0;
 plotbdist(M1E_18,M2E_18,M1E_58,M2E_58,M1I_18,M2I_18,M1I_58,M2I_58,b,xmin,xmax,bins)
 
 set(gcf,'color','w');
