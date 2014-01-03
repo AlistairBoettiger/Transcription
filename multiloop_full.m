@@ -44,7 +44,8 @@ p = kab/(kab+kba); % probability of find ing the system in the final state
 m1E_58  = m1Et + mS*(1-p);  % First moment of ER model
 m2E_58 = m2Et + (1-p)*(2*m1Et*mS+m2S); % Second moment of ER model
 
- save multiloop_data; 
+
+ % save multiloop_data; 
 
  
  
@@ -82,7 +83,7 @@ end
 
 
 % % If you don't want to run this cell again, save it's data
- save loop58_data;
+ % save loop58_data;
 
 
 %% Explore Parameter Space
